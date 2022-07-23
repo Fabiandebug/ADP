@@ -30,22 +30,25 @@ def RateLimitChecker(ip_address, url, maxrate):
             ip_address=ip_address, url=url, count=1, maxrate=maxrate)
     else:
         ratelimitObj = ratelimitObj[0]
-        if(timezone.now() - ratelimitObj.lastupdated < datetime.timedelta(days=1)):
+        current_time = timezone.localtime(timezone.now())
+        timediff = current_time - ratelimitObj.lastupdated
+        if(timediff < datetime.timedelta(seconds=10)):
             if(ratelimitObj.count >= ratelimitObj.maxrate):
                 response_data = {
                     "success": False,
-                    "message": "Api Call Rate exceeded"
+                    "message": "Api Call Rate exceeded",
+                    "timediffrence": timediff
                 }
                 return response_data
             else:
                 count = ratelimitObj.count+1
                 ratelimitObj.count = count
-                ratelimitObj.lastupdated = datetime.datetime.now()
+                ratelimitObj.lastupdated = current_time
                 ratelimitObj.save()
         else:
             count = 1
             ratelimitObj.count = 1
-            ratelimitObj.lastupdated = datetime.datetime.now()
+            ratelimitObj.lastupdated = current_time
             ratelimitObj.save()
     response_data = {
         "success": True,
