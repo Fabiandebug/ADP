@@ -8,7 +8,12 @@ from rest_framework import status
 from .models import apirates
 import datetime
 from django.utils import timezone
+import requests
+import json
 # Create your views here.
+
+
+# Problem 1 - API rate-limiting
 
 # Get user ip_address
 
@@ -73,4 +78,61 @@ class second_api_call(APIView):
         maxrate = 8
         url = "http://127.0.0.1:8080/api2/"
         response_data = RateLimitChecker(ip_address, url, maxrate)
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+# Problem 2 - Client-side general chart visualizations
+# I used the RapidAPI.com platforms free open API on Covid19 data to setup my general chart visualization
+
+
+def get_country_history_data(country):
+
+    url = (f"https://covid-193.p.rapidapi.com/history?country={country}")
+
+    headers = {
+        "X-RapidAPI-Key": "9f5981b0f3msheb7c904144e3675p16a530jsn1d8c399a30d6",
+        "X-RapidAPI-Host": "covid-193.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers)
+    input_data = json.loads(response.text)
+    # for data in input_data['response']:
+    #     print(data['cases']['new'])
+
+    country_name = input_data['response'][0]['country']
+    new_case = input_data['response'][0]['cases']['new']
+    active = input_data['response'][0]['cases']['active']
+    critical = input_data['response'][0]['cases']['critical']
+    recovered = input_data['response'][0]['cases']['recovered']
+    total = input_data['response'][0]['cases']['total']
+    date = input_data['response'][0]['day']
+    context = {
+        'country': country_name,
+        'new_case': new_case,
+        'active': active,
+        'critical': critical,
+        'recovered': recovered,
+        'total': total,
+        'date': date,
+    }
+    return context
+
+
+def get_country_history_bydate_date(country, date):
+    url = (
+        f"https://covid-193.p.rapidapi.com/history?country={country}&amp;day={date}")
+
+    headers = {
+        "X-RapidAPI-Key": "9f5981b0f3msheb7c904144e3675p16a530jsn1d8c399a30d6",
+        "X-RapidAPI-Host": "covid-193.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers)
+
+    return response.json()
+
+
+class covid19_data(APIView):
+    def get(self, request, country):
+        response_data = get_country_history_data(country)
         return Response(response_data, status=status.HTTP_200_OK)
