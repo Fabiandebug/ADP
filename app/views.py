@@ -1,6 +1,8 @@
 from ipaddress import ip_address
 from urllib import request
+from django.shortcuts import render
 from rest_framework.views import APIView
+from django.views.generic import TemplateView
 from django.http import HttpResponse, JsonResponse
 from ipware import get_client_ip
 from rest_framework.response import Response
@@ -95,27 +97,8 @@ def get_country_history_data(country):
     }
 
     response = requests.get(url, headers=headers)
-    input_data = json.loads(response.text)
-    # for data in input_data['response']:
-    #     print(data['cases']['new'])
 
-    country_name = input_data['response'][0]['country']
-    new_case = input_data['response'][0]['cases']['new']
-    active = input_data['response'][0]['cases']['active']
-    critical = input_data['response'][0]['cases']['critical']
-    recovered = input_data['response'][0]['cases']['recovered']
-    total = input_data['response'][0]['cases']['total']
-    date = input_data['response'][0]['day']
-    context = {
-        'country': country_name,
-        'new_case': new_case,
-        'active': active,
-        'critical': critical,
-        'recovered': recovered,
-        'total': total,
-        'date': date,
-    }
-    return context
+    return response
 
 
 def get_country_history_bydate_date(country, date):
@@ -134,5 +117,31 @@ def get_country_history_bydate_date(country, date):
 
 class covid19_data(APIView):
     def get(self, request, country):
+
         response_data = get_country_history_data(country)
-        return Response(response_data, status=status.HTTP_200_OK)
+        input_data = json.loads(response_data.text)
+        new_case = []
+        date = []
+        for data in input_data['response']:
+            country_name = data['country']
+            # new_case = data['cases']['new']
+            active = data['cases']['active']
+            critical = data['cases']['critical']
+            recovered = data['cases']['recovered']
+            total = data['cases']['total']
+            # date = data['day']
+
+            new_case.append(data['cases']['new'])
+            date.append(data['day'])
+
+            data = {
+                'country': country_name,
+                'new_case': new_case,
+                'active': active,
+                'critical': critical,
+                'recovered': recovered,
+                'total': total,
+                'date': date,
+            }
+            print(data)
+        return Response(data)
