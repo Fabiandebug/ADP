@@ -1,3 +1,6 @@
+from ast import Is
+from asyncio.windows_events import NULL
+from calendar import month
 from ipaddress import ip_address
 from urllib import request
 from django.shortcuts import render
@@ -12,7 +15,9 @@ import datetime
 from django.utils import timezone
 import requests
 import json
-# Create your views here.
+from requests.exceptions import ConnectionError
+import pandas as pd
+# # Create your views here.
 
 
 # Problem 1 - API rate-limiting
@@ -115,33 +120,55 @@ def get_country_history_bydate_date(country, date):
     return response.json()
 
 
-class covid19_data(APIView):
+class covid19_data2(APIView):
+
     def get(self, request, country):
 
         response_data = get_country_history_data(country)
         input_data = json.loads(response_data.text)
+        working_data = input_data['response']
         new_case = []
         date = []
-        for data in input_data['response']:
-            country_name = data['country']
-            # new_case = data['cases']['new']
-            active = data['cases']['active']
-            critical = data['cases']['critical']
-            recovered = data['cases']['recovered']
-            total = data['cases']['total']
-            # date = data['day']
 
-            new_case.append(data['cases']['new'])
-            date.append(data['day'])
+        for x in range(1, 30):
 
-            data = {
-                'country': country_name,
-                'new_case': new_case,
-                'active': active,
-                'critical': critical,
-                'recovered': recovered,
-                'total': total,
-                'date': date,
+            country = working_data[0]['country']
+            new_case.append(working_data[x]['cases']['new'])
+            date.append(working_data[x]['day'])
+
+            context = {
+                "country_name": country,
+                "new_case": new_case,
+                "date": date,
             }
-            print(data)
-        return Response(data)
+
+        return Response(context, status=status.HTTP_200_OK)
+
+
+def testdata(request):
+
+    if request.method == "POST":
+        country = request.POST['country']
+        print(country)
+
+        response_data = get_country_history_data(country)
+        input_data = json.loads(response_data.text)
+        working_data = input_data['response']
+        new_case = []
+        date = []
+
+        for x in range(1, 30):
+
+            country = working_data[0]['country']
+            new_case.append(working_data[x]['cases']['new'])
+            date.append(working_data[x]['day'])
+
+            context = {
+                "country_name": country,
+                "new_case": new_case,
+                "case_date": date,
+            }
+    else:
+        country = ''
+        context = {}
+    return render(request, 'chart.html', context)
