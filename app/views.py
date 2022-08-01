@@ -2,6 +2,8 @@ from ast import Is
 from asyncio.windows_events import NULL
 from calendar import month
 from ipaddress import ip_address
+from multiprocessing import context
+import statistics
 from urllib import request
 from django.shortcuts import render
 from rest_framework.views import APIView
@@ -106,43 +108,14 @@ def get_country_history_data(country):
     return response
 
 
-def get_country_history_bydate_date(country, date):
-    url = (
-        f"https://covid-193.p.rapidapi.com/history?country={country}&amp;day={date}")
-
-    headers = {
-        "X-RapidAPI-Key": "9f5981b0f3msheb7c904144e3675p16a530jsn1d8c399a30d6",
-        "X-RapidAPI-Host": "covid-193.p.rapidapi.com"
-    }
-
-    response = requests.get(url, headers=headers)
-
-    return response.json()
-
-
 class covid19_data2(APIView):
 
     def get(self, request, country):
 
         response_data = get_country_history_data(country)
         input_data = json.loads(response_data.text)
-        working_data = input_data['response']
-        new_case = []
-        date = []
 
-        for x in range(1, 30):
-
-            country = working_data[0]['country']
-            new_case.append(working_data[x]['cases']['new'])
-            date.append(working_data[x]['day'])
-
-            context = {
-                "country_name": country,
-                "new_case": new_case,
-                "date": date,
-            }
-
-        return Response(context, status=status.HTTP_200_OK)
+        return Response(input_data, status=status.HTTP_200_OK)
 
 
 def testdata(request):
@@ -172,3 +145,76 @@ def testdata(request):
         country = ''
         context = {}
     return render(request, 'chart.html', context)
+
+
+# Problem 3 - Client-side data table
+# I used the RapidAPI.com platforms free open API on Covid19 data to setup my data table
+
+def get_statistics(request):
+
+    url = "https://covid-193.p.rapidapi.com/statistics"
+
+    headers = {
+        "X-RapidAPI-Key": "9f5981b0f3msheb7c904144e3675p16a530jsn1d8c399a30d6",
+        "X-RapidAPI-Host": "covid-193.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers)
+
+    return response
+
+
+class data_table_api(APIView):
+    def get(self, request):
+        country = []
+        new_case = []
+        total_cases = []
+        recoverd = []
+        deaths = []
+        day = []
+
+        statistics = get_statistics(request)
+        response_data = json.loads(statistics.text)
+        for data in response_data['response']:
+
+            country.append(data['country'])
+            new_case.append(data['cases']['new'])
+            total_cases.append(data['cases']['total'])
+            recoverd.append(data['cases']['recovered'])
+            deaths.append(data['deaths']['total'])
+            day.append(data['day'])
+
+            context = {
+                "country": country,
+                "new_case": new_case,
+                "total_cases": total_cases,
+                "deaths": deaths,
+                "date": day
+            }
+
+        return Response(context, status=status.HTTP_200_OK)
+
+
+def get_data_table(request):
+
+    country = []
+    new_case = []
+    total_cases = []
+    recoverd = []
+    deaths = []
+    day = []
+
+    statistics = get_statistics(request)
+    response_data = json.loads(statistics.text)
+    for data in response_data['response']:
+
+        country.append(data['country'])
+        new_case.append(data['cases']['new'])
+        total_cases.append(data['cases']['total'])
+        recoverd.append(data['cases']['recovered'])
+        deaths.append(data['deaths']['total'])
+        day.append(data['day'])
+
+        context = zip(country, new_case, total_cases, recoverd, deaths, day)
+
+    return render(request, 'datatable.html', {'context': context})

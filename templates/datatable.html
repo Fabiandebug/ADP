@@ -1,0 +1,44 @@
+{% extends 'base.html' %} {% block title%} Data Table {% endblock title%} 
+
+
+
+{% block scripts%} 
+<script>
+    $(document).ready( function () {
+        $('#table_id').DataTable();
+    } );
+</script>
+{% endblock scripts%} 
+
+{% block content%} 
+  <h2> Covid19  Statistics Data Table</h2>
+
+</br>
+<table id="table_id" class="display">
+    <thead>
+        <tr>
+            <th>Country</th>
+            <th>New Case</th>
+            <th>Total Cases</th>
+            <th>Recovered</th>
+            <th>Deaths</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for data in context %}
+        <tr>
+            <td>{{data.0}}</td>  
+            <td>{{data.1}}</td> 
+            <td>{{data.2}}</td> 
+            <td>{{data.3}}</td> 
+            <td>{{data.4}}</td>  
+            <td>{{data.5}}</td>     
+        </tr> 
+        {% endfor %}
+
+    </tbody>
+</table>
+
+
+{% endblock content%}
