@@ -222,7 +222,7 @@ def get_data_table(request):
 
 
 # Problem 4 - Client-side geo visualizaion
-#  i used John Hopkins Hospital Covid 19 data as my geo visualization data
+#  I used John Hopkins Hospital Covid 19 data as my geo visualization data
 def geo_visualization(request):
     covid_df = pd.read_csv(
         "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-28-2020.csv")
@@ -245,14 +245,3 @@ def geo_visualization(request):
     }
 
     return render(request, 'geovisualization.html', context)
-
-
-# plotdata = covid_df[['Lat', 'Long_', 'Confirmed', 'Combined_Key']].apply(
-#         lambda x: circle_maker(x), axis=1)
-
-#     data_map = folium.Map(zoom_start=8)
-
-#     def circle_maker(x):
-#         folium.Circle(location=[x[0], x[1]], radius=float(x[2])*10, color='red',
-#                       fill=True, popup='{}\nconfirmed: {} '.format(x[3], x[2])).add_to(data_map)
-# popup='{}\nconfirmed: {} '.format(data[3], data[2])
