@@ -1,14 +1,13 @@
 from ast import Is
-from asyncio.windows_events import NULL
 from calendar import month
+from cmath import nan
 from ipaddress import ip_address
-from multiprocessing import context
-import statistics
+from turtle import color
 from urllib import request
 from django.shortcuts import render
+from numpy import longlong
 from rest_framework.views import APIView
 from django.views.generic import TemplateView
-from django.http import HttpResponse, JsonResponse
 from ipware import get_client_ip
 from rest_framework.response import Response
 from rest_framework import status
@@ -17,8 +16,10 @@ import datetime
 from django.utils import timezone
 import requests
 import json
-from requests.exceptions import ConnectionError
+import folium
 import pandas as pd
+
+
 # # Create your views here.
 
 
@@ -218,3 +219,40 @@ def get_data_table(request):
         context = zip(country, new_case, total_cases, recoverd, deaths, day)
 
     return render(request, 'datatable.html', {'context': context})
+
+
+# Problem 4 - Client-side geo visualizaion
+#  i used John Hopkins Hospital Covid 19 data as my geo visualization data
+def geo_visualization(request):
+    covid_df = pd.read_csv(
+        "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-28-2020.csv")
+
+    plotdata = covid_df[['Lat', 'Long_', 'Confirmed', 'Combined_Key']]
+
+    data = plotdata.dropna()
+
+    data_map = folium.Map(zoom_start=100)
+
+    for (index, row) in data.iterrows():
+        folium.Circle(location=[row.loc['Lat'], row.loc['Long_']], radius=10000, color='red',
+                      popup='{}\nconfirmed Cases: {} '.format(
+                          row.loc['Confirmed'], row.loc['Combined_Key']), tooltip='click').add_to(data_map)
+
+    m = data_map._repr_html_()
+
+    context = {
+        'datamap': m
+    }
+
+    return render(request, 'geovisualization.html', context)
+
+
+# plotdata = covid_df[['Lat', 'Long_', 'Confirmed', 'Combined_Key']].apply(
+#         lambda x: circle_maker(x), axis=1)
+
+#     data_map = folium.Map(zoom_start=8)
+
+#     def circle_maker(x):
+#         folium.Circle(location=[x[0], x[1]], radius=float(x[2])*10, color='red',
+#                       fill=True, popup='{}\nconfirmed: {} '.format(x[3], x[2])).add_to(data_map)
+# popup='{}\nconfirmed: {} '.format(data[3], data[2])
