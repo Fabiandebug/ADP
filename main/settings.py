@@ -34,7 +34,7 @@ SECRET_KEY = config.get("base", "SECRET_KEY")
 DEBUG = json.loads(str(config.get("base", "DEBUG")).lower())
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['adpapps.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
