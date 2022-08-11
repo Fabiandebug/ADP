@@ -1,3 +1,2 @@
-
-web: gunicorn main.wsgi:application --preload --workers 1
+web: gunicorn main.wsgi --log-file -
 
