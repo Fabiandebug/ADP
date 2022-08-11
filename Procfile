@@ -1,3 +1,3 @@
 
-web: gunicorn main.wsgi.wsgi
+web: gunicorn main.wsgi.py
 
