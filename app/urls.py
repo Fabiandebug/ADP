@@ -21,4 +21,7 @@ urlpatterns = [
     #  Problem 4 URLS Client-side geo visualizations
     path('geo/data/map/', views.geo_visualization, name="Geo Data Map"),
 
+    # Home Page url
+    path('', views.home, name='Home Page')
+
 ]

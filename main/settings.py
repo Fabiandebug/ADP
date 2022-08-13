@@ -11,8 +11,6 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import json
 import os
-import django_heroku
-import dj_database_url
 from configparser import ConfigParser
 from pathlib import Path
 
@@ -36,7 +34,7 @@ SECRET_KEY = config.get("base", "SECRET_KEY")
 DEBUG = json.loads(str(config.get("base", "DEBUG")).lower())
 
 
-ALLOWED_HOSTS = ['adp-app.herokuapp.com', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -101,9 +99,6 @@ DATABASES = {
     }
 }
 
-db_from_env = dj_database_url.config()
-DATABASES['default'].update(db_from_env)
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -143,7 +138,6 @@ STATIC_URL = 'static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR/'staticfiles')
 STATIC_URL = "/static/"
-django_heroku.settings(locals())
 
 
 # Whitenoise

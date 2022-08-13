@@ -245,3 +245,7 @@ def geo_visualization(request):
     }
 
     return render(request, 'geovisualization.html', context)
+
+def home(request):
+    
+    return render(request,'index.html')
